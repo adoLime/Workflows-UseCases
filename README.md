@@ -157,11 +157,16 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
    - classical-k-means
 4. After all steps have been executed, they appear in the experiment timeline.
 
+![QHAna timeline](qhana-muse/timelineMuse.png)
+
 ### Exporting the workflow
 
 1. Click the **Export Workflow** button in the timeline header.
 2. In the step selection dialog, all seven steps are listed and selected by default.
    Optionally, use the quality filter to filter steps by their result quality.
+
+![The selection dialog](qhana-muse/SelectStepsForWorkflow.png)
+
 3. Click **Export Selected** to generate the workflow.
 4. The system enriches the selected steps, generates a workflow, and navigates
    to the workflow editor tab.
@@ -170,8 +175,12 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
 
 1. In the workflow editor, the generated workflow is listed under "Load Saved Workflow".
    Open it to see the seven steps modeled as QHAna service tasks.
+![The QHAna service tasks](qhana-muse/QHAnaWorkflow.png)
+
 2. Click **Transformation** in the top bar to convert the QHAna service tasks into
    executable BPMN service tasks.
+![The executable BPMN service tasks](qhana-muse/QHAnaWorkflowTransformed.png)
+
 3. Verify that input and output mappings are correct:
    - The `costume-loader` plugin has no preceding step, so its parameters appear as
      start form fields.
@@ -181,9 +190,15 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
 4. Click **Deploy Workflow** to deploy the transformed workflow.
 5. The workflow appears as a new plugin in the workspace. Fill in the form fields
    (all fields except the database password are pre-filled with default values).
+   ![The workflow as a new plugin](qhana-muse/MUSEtransformedAsPlugin.png)
 6. Submit the plugin. The process should terminate without errors.
+![The sudmitted plugin](qhana-muse/miniMusePluginSubmitted.png)
+
 7. Check the results in the timeline tab under "Outputs". The output should contain
    the same clustering result as the original manual MUSE experiment execution.
+
+   ![JSON data](qhana-muse/outputJson.png)
+   ![Visualized clusters](qhana-muse/outputClusters.png) |
 
 The pre-generated workflow can be found in `qhana-muse/muse-workflow.bpmn`.
 
@@ -206,16 +221,21 @@ A qubit node, a register node, a Hadamard gate, and a Measurement node connected
 sequentially. All values are specified directly. This model generates a standard
 workflow that compiles the circuit at generation time and executes it via Qunicorn.
 
+![A low-code model containing a fixed value](low-code-backend/models/qubitModel.png)
+
 **Placeholder Model:**
 A Number node, a Basis Encoding node, and a Measurement node connected sequentially.
 The Number node's value is set to a placeholder variable instead of a concrete number.
 This model generates a placeholder workflow where the user provides the value at runtime
 through a Camunda form field.
+![A low-code model containing the placeholder a](low-code-backend/models/placeholderModel.png)
 
 **Plugin Model:**
 A File node, a Number node, and a Classical Clustering (K-Means) plugin node.
 The File node provides the entity points URL, the Number node specifies the number of
 clusters. This model generates a plugin workflow that calls the QHAna plugin runner.
+
+![A low-code model containing the K-Means plugin](low-code-backend/models/kMeanModel.png)
 
 ### Generating the workflow
 
