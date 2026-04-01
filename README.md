@@ -272,7 +272,12 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
 
 1. Open the Workflow Editor at http://localhost:1893.
 2. Open downloaded bpmn workflow.
+   -  Fixed-Value workflow
 ![Workflow containing Qubit Node](graphics/workflowQubit.png)
+   -  Workflow containing a placeholder
+   ![Workflow containing a placeholdere](graphics/workflowPlaceholder.png)
+   -  Workflow containing a plugin node
+   ![Workflow containing a plugin node](graphics/workflowKMean.png)
 3. Click the Deploy Workflow button in the Workflow Editor.
 
 ### Executing in Camunda
@@ -287,7 +292,7 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
    - **Backend Port**: `8000`
    - **Plugin Port**: `5005` (only for plugin models)
    - **Placeholder** (only for placeholder models): The value to substitute
-   ![Camunda Form Fields](graphics/CamundaIP.png)
+   ![Camunda Form Fields](graphics/CamundaStartProcess_Placeholder.png)
 5. Open the **Cockpit** to monitor the running process instance.
 6. The process token should advance through the tasks and reach the
    **Analyze Results** user task.
