@@ -256,7 +256,7 @@ clusters. This model generates a plugin workflow that calls the QHAna plugin run
 
 ### Generating the workflow
 
-1. Click the **Compile** button in the modeler with the compilation target set to
+1. Click the **Send To Backend** button in the modeler with the compilation target set to
    **workflow**.
 2. Wait for the backend to generate the workflow. The status can be tracked in the
    modeler's history view.
