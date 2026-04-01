@@ -229,7 +229,7 @@ workflows, as described in Sections 4.2, 5.2, and 6.2 of the paper.
 ### Loading a test model
 
 1. Open the low-code modeler at http://localhost:4242.
-2. Import one of the test models from the `low-code-backend/models/` directory.
+2. Import one of the test models from the [low-code-backend/models/](low-code-backend/models/) directory.
 
 The following three models are provided:
 
@@ -256,29 +256,46 @@ clusters. This model generates a plugin workflow that calls the QHAna plugin run
 
 ### Generating the workflow
 
-1. Click the **Send To Backend** button in the modeler with the compilation target set to
+1. Click the **Send to Backend** button in the modeler with the compilation target set to
    **workflow**.
+   ![Send to Backend](low-code-backend/sendToBackend.png)
 2. Wait for the backend to generate the workflow. The status can be tracked in the
    modeler's history view.
 3. Once the status is **completed**, download the generated workflow and the QRM
    archive (if the model contains quantum elements).
+   ![History](low-code-backend/history.png)
 
-Alternatively, you can use the pre-generated workflows from the `low-code-backend/workflows/` directory.
 
-### Deploying and executing in Camunda
+Alternatively, you can use the pre-generated workflows from the [low-code-backend/workflows/](low-code-backend/workflows/) directory.
+
+### Deploying in Workflow Editor
+
+1. Open the Workflow Editor at http://localhost:1893.
+2. Open downloaded bpmn workflow.
+![Workflow containing Qubit Node](low-code-backend/workflowQubit.png)
+3. Click the Deploy Workflow button in the Workflow Editor.
+
+### Executing in Camunda
 
 1. Open the Camunda web interface at http://localhost:8090.
 2. Log in with the credentials **demo / demo**.
-3. Deploy the generated workflow file.
-4. Start a new process instance and fill in the required form fields:
+3. Start a new process instance:
+![Camunda Start Process](low-code-backend/CamundaStartProcess.png)
+4. Fill in the required form fields:
    - **IP Address**: The IP address of the host machine (e.g., `localhost`)
    - **Qunicorn Port**: `8080`
    - **Backend Port**: `8000`
    - **Plugin Port**: `5005` (only for plugin models)
    - **Placeholder** (only for placeholder models): The value to substitute
+   ![Camunda Form Fields](low-code-backend/CamundaIP.png)
 5. Open the **Cockpit** to monitor the running process instance.
 6. The process token should advance through the tasks and reach the
    **Analyze Results** user task.
+   ![Camunda Analyze Results](low-code-backend/CamundaWorkflowQubit.png)
+7. Open the Task List and Claim the Task:
+![Camunda Task List](low-code-backend/CamundaClaim.png)
+8. Find the result in Form: 
+![CamundaResult](low-code-backend/CamundaResult.png)
 
 ## References
 
