@@ -294,7 +294,7 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
    ![Camunda Analyze Results](low-code-backend/CamundaWorkflowQubit.png)
 7. Open the Task List and Claim the Task:
 ![Camunda Task List](low-code-backend/CamundaClaim.png)
-8. Find the result in Form: 
+8. Check the results in the Form tab under "resultExecution": 
 ![CamundaResult](low-code-backend/CamundaResult.png)
 
 ## References
