@@ -3,24 +3,29 @@
 This repository contains the test models, generated workflows, and setup instructions
 for the research project *"From Experiments to Workflows"*.
 
-The project extends the [LEQO low-code backend](https://github.com/LEQO-Framework/leqo-backend)
-with workflow generation capabilities, supporting three types of models:
-fixed-value models, placeholder models, and plugin models.
+The project consists of two parts:
+1. **QHAna timeline export**: Generating executable workflows from QHAna experiment
+   timeline steps (validated with the MUSE experiment).
+2. **Low-code backend extension**: Transforming quantum low-code models into executable
+   workflows, supporting fixed-value models, placeholder models, and plugin models.
 
 ## Repository Structure
 
 ```
 .
-├── models/
-│   ├── fixed-value-model.json      # Test model without placeholders
-│   ├── placeholder-model.json      # Test model with a placeholder value
-│   └── plugin-model.json           # Test model with Classical K-Means plugin
-├── workflows/
-│   ├── fixed-value-workflow.bpmn   # Generated workflow for fixed-value model
-│   ├── placeholder-workflow.bpmn   # Generated workflow for placeholder model
-│   ├── plugin-workflow.bpmn        # Generated workflow for plugin model
-│   └── qrms/
-│       └── qrms.zip                # Generated QRMs for quantum groups
+├── qhana-muse/
+│   └── muse-workflow.bpmn              # Generated workflow from the MUSE experiment
+├── low-code-backend/
+│   ├── models/
+│   │   ├── fixed-value-model.json      # Test model without placeholders
+│   │   ├── placeholder-model.json      # Test model with a placeholder value
+│   │   └── plugin-model.json           # Test model with Classical K-Means plugin
+│   └── workflows/
+│       ├── fixed-value-workflow.bpmn   # Generated workflow for fixed-value model
+│       ├── placeholder-workflow.bpmn   # Generated workflow for placeholder model
+│       ├── plugin-workflow.bpmn        # Generated workflow for plugin model
+│       └── qrms/
+│           └── qrms.zip               # Generated QRMs for quantum groups
 └── README.md
 ```
 
@@ -66,7 +71,7 @@ cd qunicorn-core
 ```
 
 Replace the `docker-compose.yml` with the version from this repository or from
-`daria_docs/docker-compose(2).yaml`, then start the services:
+`/docker-compose.yaml`, then start the services:
 
 ```bash
 docker-compose pull
@@ -100,12 +105,14 @@ cd leqo-backend
 
 | Service            | URL                        | Description                                      |
 |--------------------|----------------------------|--------------------------------------------------|
-| Low-Code Modeler   | http://localhost:4200      | Visual editor for quantum low-code models        |
+| Low-Code Modeler   | http://localhost:4242      | Visual editor for quantum low-code models        |
 | Low-Code Backend   | http://localhost:8000      | Transformation pipeline and workflow generation  |
 
-### Step 4: Start the QHAna environment (only for plugin models)
+### Step 4: Start the QHAna environment
 
-This step is only required for testing models with ML nodes (e.g., Classical K-Means).
+This step is required for the MUSE experiment (QHAna timeline export) and for testing low-code models with ML nodes (e.g., Classical K-Means).
+
+Start the QHAna backend services via Docker:
 
 ```bash
 git clone https://github.com/UST-QuAntiL/qhana-docker.git
@@ -114,16 +121,83 @@ docker-compose pull
 docker-compose up -d
 ```
 
+In a separate terminal, start the QHAna UI:
+
+```bash
+git clone https://github.com/UST-QuAntiL/qhana-ui.git
+cd qhana-ui
+npm install
+ng serve
+```
+
 | Service             | URL                        | Description                                  |
 |---------------------|----------------------------|----------------------------------------------|
+| QHAna UI            | http://localhost:4200      | Web interface for QHAna experiments          |
 | QHAna Plugin Runner | http://localhost:5005      | Executes ML plugins (e.g., Classical K-Means)|
 
-## Usage
+---
+
+## Usage 1: QHAna MUSE Experiment (Timeline Export)
+
+This use case demonstrates the workflow generation from QHAna experiment timeline steps,
+as described in Sections 4.1, 5.1, and 6.1 of the paper.
+
+### Running the MUSE experiment
+
+1. Open the QHAna UI at http://localhost:4200.
+2. Create a new experiment or open an existing one.
+3. Follow the MUSE experiment guide at
+   https://qhana.readthedocs.io/en/latest/muse.html to execute the seven steps:
+   - costume-loader
+   - wu-palmer
+   - sym-max-mean
+   - sim-to-dist-transformers
+   - distance-aggregator
+   - mds
+   - classical-k-means
+4. After all steps have been executed, they appear in the experiment timeline.
+
+### Exporting the workflow
+
+1. Click the **Export Workflow** button in the timeline header.
+2. In the step selection dialog, all seven steps are listed and selected by default.
+   Optionally, use the quality filter to filter steps by their result quality.
+3. Click **Export Selected** to generate the workflow.
+4. The system enriches the selected steps, generates a workflow, and navigates
+   to the workflow editor tab.
+
+### Transforming and executing the workflow
+
+1. In the workflow editor, the generated workflow is listed under "Load Saved Workflow".
+   Open it to see the seven steps modeled as QHAna service tasks.
+2. Click **Transformation** in the top bar to convert the QHAna service tasks into
+   executable BPMN service tasks.
+3. Verify that input and output mappings are correct:
+   - The `costume-loader` plugin has no preceding step, so its parameters appear as
+     start form fields.
+   - The `wu-palmer` plugin receives its input from the output of `costume-loader`.
+   - The output parameter of the last step (`classical-k-means`) is prefixed with
+     `return.` to mark it as the process return value.
+4. Click **Deploy Workflow** to deploy the transformed workflow.
+5. The workflow appears as a new plugin in the workspace. Fill in the form fields
+   (all fields except the database password are pre-filled with default values).
+6. Submit the plugin. The process should terminate without errors.
+7. Check the results in the timeline tab under "Outputs". The output should contain
+   the same clustering result as the original manual MUSE experiment execution.
+
+The pre-generated workflow can be found in `qhana-muse/muse-workflow.bpmn`.
+
+---
+
+## Use Case 2: Low-Code Backend (Workflow Generation)
+
+This use case demonstrates the transformation of quantum low-code models into executable
+workflows, as described in Sections 4.2, 5.2, and 6.2 of the paper.
 
 ### Loading a test model
 
-1. Open the low-code modeler at http://localhost:4200.
-2. Import one of the test models from the `models/` directory.
+1. Open the low-code modeler at http://localhost:4242.
+2. Import one of the test models from the `low-code-backend/models/` directory.
 
 The following three models are provided:
 
@@ -152,7 +226,7 @@ clusters. This model generates a plugin workflow that calls the QHAna plugin run
 3. Once the status is **completed**, download the generated workflow and the QRM
    archive (if the model contains quantum elements).
 
-Alternatively, you can use the pre-generated workflows from the `workflows/` directory.
+Alternatively, you can use the pre-generated workflows from the `low-code-backend/workflows/` directory.
 
 ### Deploying and executing in Camunda
 
@@ -176,3 +250,4 @@ Alternatively, you can use the pre-generated workflows from the `workflows/` dir
 - [Qunicorn](https://github.com/qunicorn/qunicorn-core)
 - [QuantME-UseCases](https://github.com/UST-QuAntiL/QuantME-UseCases)
 - [QHAna Docker](https://github.com/UST-QuAntiL/qhana-docker)
+- [MUSE Experiment Guide](https://qhana.readthedocs.io/en/latest/muse.html)
