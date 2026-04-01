@@ -295,13 +295,33 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
 7. Open the Task List and Claim the Task:
 ![Camunda Task List](graphics/CamundaClaim.png)
 8. Check the results in the Form tab under "resultExecution": 
-![CamundaResult](graphics/CamundaResult.png)
 
+
+### Results
+
+#### Fixed-Value Model
 Since
 the test model applies a Hadamard gate to a single qubit initialized in the |0⟩ state, the expected
 measurement result is an approximately equal distribution between 0 and 1. The results returned
 by Qunicorn confirmed this: the measured probabilities were close to 50 % for each outcome,
 which matches the theoretical prediction for this circuit.
+![CamundaResult](graphics/CamundaResult.png)
+
+#### Placeholder Model
+Since the test model uses basis encoding, the measurement result is deterministic: basis
+encoding maps a number to its binary representation in qubits. For the input value 47, the binary
+representation is 101111, which requires six qubits. The backend dynamically allocated six qubits
+and the measurement returned the hex value 0x2f, which corresponds exactly to the decimal value
+47. This deterministic result confirms that the placeholder substitution, the dynamic compilation,
+and the subsequent quantum execution all work correctly together.
+![CamundaResult](graphics/CamundaResult_Placeholder.png)
+
+#### Plugin Model
+We retrieved the clustering result via the output URLs and verified that every data point received
+a cluster label between 0 and 3, matching the requested number of four clusters. This confirms
+that the plugin received the correct parameters (entity points URL and number of clusters) from
+the workflow and produced a valid clustering.
+![CamundaResult](graphics/CamundaResult_kMean.png)
 
 ## References
 
