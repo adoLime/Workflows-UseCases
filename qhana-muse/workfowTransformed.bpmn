@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Experiment_MiniMUSE" name="Experiment_MiniMUSE_transformed" isExecutable="true" camunda:historyTimeToLive="360000">
+    <bpmn2:startEvent id="StartEvent_1">
+      <bpmn2:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="start_costumeType" label="Costume Type" type="string" defaultValue="WITHOUT_BASE_ELEMENTS"/>
+          <camunda:formField id="start_dbHost" label="Db Host" type="string" defaultValue="muse-db"/>
+          <camunda:formField id="start_dbUser" label="Db User" type="string" defaultValue="test"/>
+          <camunda:formField id="start_dbPassword" label="Db Password" type="string"/>
+          <camunda:formField id="start_dbDatabase" label="Db Database" type="string" defaultValue="KostuemRepo"/>
+          <camunda:formField id="start_attributes" label="Attributes" type="string" defaultValue="dominanteFarbe&#xA;dominanterZustand&#xA;dominanteCharaktereigenschaft&#xA;dominanterAlterseindruck&#xA;genre"/>
+          <camunda:formField id="start_transformer" label="Transformer" type="string" defaultValue="linear_inverse"/>
+          <camunda:formField id="start_aggregator" label="Aggregator" type="string" defaultValue="mean"/>
+          <camunda:formField id="start_missingDataHandling" label="Missing Data Handling" type="string" defaultValue="ignore"/>
+          <camunda:formField id="start_dimensions" label="Dimensions" type="string" defaultValue="2"/>
+          <camunda:formField id="start_metric" label="Metric" type="string" defaultValue="metric_mds"/>
+          <camunda:formField id="start_nInit" label="N Init" type="string" defaultValue="4"/>
+          <camunda:formField id="start_maxIter" label="Max Iter" type="string" defaultValue="300"/>
+          <camunda:formField id="start_numClusters" label="Num Clusters" type="string" defaultValue="2"/>
+          <camunda:formField id="start_maxiter" label="Maxiter" type="string" defaultValue="100"/>
+          <camunda:formField id="start_relativeResidual" label="Relative Residual" type="string" defaultValue="1"/>
+          <camunda:formField id="start_visualize" label="Visualize" type="string" defaultValue="on"/>
+        </camunda:formData>
+      </bpmn2:extensionElements>
+      <bpmn2:outgoing>Flow_0</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:endEvent id="EndEvent_1">
+      <bpmn2:incoming>Flow_end</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_0" sourceRef="StartEvent_1" targetRef="Activity_0"/>
+    <bpmn2:sequenceFlow id="Flow_1" sourceRef="Activity_0" targetRef="Activity_1"/>
+    <bpmn2:sequenceFlow id="Flow_2" sourceRef="Activity_1" targetRef="Activity_2"/>
+    <bpmn2:sequenceFlow id="Flow_3" sourceRef="Activity_2" targetRef="Activity_3"/>
+    <bpmn2:sequenceFlow id="Flow_4" sourceRef="Activity_3" targetRef="Activity_4"/>
+    <bpmn2:sequenceFlow id="Flow_5" sourceRef="Activity_4" targetRef="Activity_5"/>
+    <bpmn2:sequenceFlow id="Flow_6" sourceRef="Activity_5" targetRef="Activity_6"/>
+    <bpmn2:sequenceFlow id="Flow_end" sourceRef="Activity_6" targetRef="EndEvent_1"/>
+    <bpmn2:serviceTask id="Activity_0" name="costume-loader" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.costumeType">${start_costumeType}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.dbHost">${start_dbHost}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.dbUser">${start_dbUser}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.dbPassword">${start_dbPassword}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.dbDatabase">${start_dbDatabase}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">costume-loader</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">costume-loader</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.costumeLoader">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_1</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_1" name="wu-palmer" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.entitiesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.costumeLoader</camunda:entry>
+              <camunda:entry key="name">entities.json</camunda:entry>
+              <camunda:entry key="dataType">entity/list</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.entitiesMetadataUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.costumeLoader</camunda:entry>
+              <camunda:entry key="name">attribute_metadata.json</camunda:entry>
+              <camunda:entry key="dataType">entity/attribute-metadata</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.taxonomiesZipUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.costumeLoader</camunda:entry>
+              <camunda:entry key="name">taxonomies.zip</camunda:entry>
+              <camunda:entry key="dataType">graph/taxonomy</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.attributes">${start_attributes}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">wu-palmer</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">wu-palmer</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.wuPalmer">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_2</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_2" name="sym-max-mean" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.entitiesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.costumeLoader</camunda:entry>
+              <camunda:entry key="name">entities.json</camunda:entry>
+              <camunda:entry key="dataType">entity/list</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.elementSimilaritiesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.wuPalmer</camunda:entry>
+              <camunda:entry key="name">wu_palmer_without_root_*.zip</camunda:entry>
+              <camunda:entry key="dataType">custom/element-similarities</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.attributes">${start_attributes}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">sym-max-mean</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.1.2</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">sym-max-mean</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.symMaxMean">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_3</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_3" name="sim-to-dist-transformers" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.attributeSimilaritiesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.symMaxMean</camunda:entry>
+              <camunda:entry key="name">sym_max_mean_*.zip</camunda:entry>
+              <camunda:entry key="dataType">custom/attribute-similarities</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.attributes">${start_attributes}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.transformer">${start_transformer}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">sim-to-dist-transformers</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">sim-to-dist-transformers</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.simToDistTransformers">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_4</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_4" name="distance-aggregator" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.attributeDistancesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.simToDistTransformers</camunda:entry>
+              <camunda:entry key="name">transformers_attr_dist_transformer_linear_inverse_from_sym_max_mean_*.zip</camunda:entry>
+              <camunda:entry key="dataType">custom/attribute-distances</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.aggregator">${start_aggregator}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.missingDataHandling">${start_missingDataHandling}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">distance-aggregator</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">distance-aggregator</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.distanceAggregator">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_4</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_5</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_5" name="mds" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.entityDistancesUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.distanceAggregator</camunda:entry>
+              <camunda:entry key="name">entity_distances_aggregator_mean_from_transformers_attr_dist_transformer_linear_inverse_from_sym_max_mean_*.json</camunda:entry>
+              <camunda:entry key="dataType">custom/entity-distances</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.dimensions">${start_dimensions}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.metric">${start_metric}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.nInit">${start_nInit}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.maxIter">${start_maxIter}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">mds</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.2.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">mds</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="qoutput.mds">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_5</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_6</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:serviceTask id="Activity_6" name="classical-k-means" camunda:type="external" camunda:topic="qhana-task">
+      <bpmn2:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="qinput.entityPointsUrl">
+            <camunda:map>
+              <camunda:entry key="from">qoutput.mds</camunda:entry>
+              <camunda:entry key="name">entity_points_mds_dim_2_metric_metric_from_entity_distances_aggregator_mean_from_transformers_attr_dist_transformer_linear_inverse_from_sym_max_mean_*.json</camunda:entry>
+              <camunda:entry key="dataType">entity/vector</camunda:entry>
+            </camunda:map>
+          </camunda:inputParameter>
+          <camunda:inputParameter name="qinput.numClusters">${start_numClusters}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.maxiter">${start_maxiter}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.relativeResidual">${start_relativeResidual}</camunda:inputParameter>
+          <camunda:inputParameter name="qinput.visualize">${start_visualize}</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPlugin">classical-k-means</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaPluginVersion">v0.1.1</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaName">classical-k-means</camunda:inputParameter>
+          <camunda:inputParameter name="qhanaDescription">./notes</camunda:inputParameter>
+          <camunda:outputParameter name="return.qoutput.classicalKMeans">${output}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_6</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_end</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Experiment_MiniMUSE">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="0" y="22" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="1276" y="22" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0o10efc_di" bpmnElement="Activity_0">
+        <dc:Bounds x="86" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16eg5u5_di" bpmnElement="Activity_1">
+        <dc:Bounds x="256" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_13wf785_di" bpmnElement="Activity_2">
+        <dc:Bounds x="426" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1rjo6bm_di" bpmnElement="Activity_3">
+        <dc:Bounds x="596" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1nyf942_di" bpmnElement="Activity_4">
+        <dc:Bounds x="766" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0kvgek3_di" bpmnElement="Activity_5">
+        <dc:Bounds x="936" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_10p77dn_di" bpmnElement="Activity_6">
+        <dc:Bounds x="1106" y="0" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="36" y="40"/>
+        <di:waypoint x="86" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="186" y="40"/>
+        <di:waypoint x="256" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="356" y="40"/>
+        <di:waypoint x="426" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="526" y="40"/>
+        <di:waypoint x="596" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="696" y="40"/>
+        <di:waypoint x="766" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="866" y="40"/>
+        <di:waypoint x="936" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1036" y="40"/>
+        <di:waypoint x="1106" y="40"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_end_di" bpmnElement="Flow_end">
+        <di:waypoint x="1206" y="40"/>
+        <di:waypoint x="1276" y="40"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

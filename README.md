@@ -9,6 +9,19 @@ The project consists of two parts:
 2. **Low-code backend extension**: Transforming quantum low-code models into executable
    workflows, supporting fixed-value models, placeholder models, and plugin models.
 
+   ## Contents
+
+- [Repository Structure](#repository-structure)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+  - [Step 1: QuantME environment](#step-1-start-the-quantme-environment-camunda-winery-etc)
+  - [Step 2: Qunicorn](#step-2-start-qunicorn)
+  - [Step 3: Low-code modeler and backend](#step-3-start-the-low-code-modeler-and-backend)
+  - [Step 4: QHAna environment](#step-4-start-the-qhana-environment)
+- [Use Case 1: QHAna MUSE Experiment](#use-case-1-qhana-muse-experiment-timeline-export)
+- [Use Case 2: Low-Code Backend](#use-case-2-low-code-backend-workflow-generation)
+- [References](#references)
+
 ## Repository Structure
 
 ```
@@ -177,9 +190,13 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
    Open it to see the seven steps modeled as QHAna service tasks.
 ![The QHAna service tasks](qhana-muse/QHAnaWorkflow.png)
 
+The generated workflow can be found in `qhana-muse/muse-workflow.xml`.
+
 2. Click **Transformation** in the top bar to convert the QHAna service tasks into
    executable BPMN service tasks.
 ![The executable BPMN service tasks](qhana-muse/QHAnaWorkflowTransformed.png)
+
+The generated BPMN workflow can be found in `qhana-muse/muse-workflow_transformed.bpmn`.
 
 3. Verify that input and output mappings are correct:
    - The `costume-loader` plugin has no preceding step, so its parameters appear as
@@ -198,9 +215,9 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
    the same clustering result as the original manual MUSE experiment execution.
 
    ![JSON data](qhana-muse/outputJson.png)
-   ![Visualized clusters](qhana-muse/outputClusters.png) |
+   ![Visualized clusters](qhana-muse/outputClusters.png) 
 
-The pre-generated workflow can be found in `qhana-muse/muse-workflow.bpmn`.
+
 
 ---
 
