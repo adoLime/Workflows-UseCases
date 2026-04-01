@@ -1,0 +1,542 @@
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_9cb62375" targetNamespace="http://bpmn.io/schema/bpmn" exporter="QuantME Modeler" exporterVersion="4.5.0-nightly.20220628">
+  <bpmn:process id="Process_workflow_process" isExecutable="true" camunda:historyTimeToLive="360000">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="ipAdress" label="IP Adresse" type="string" defaultValue="" />
+          <camunda:formField id="qunicornPort" label="Qunicorn Endpoint Port" type="string" defaultValue="8080" />
+          <camunda:formField id="backendPort" label="Leqo-Backend Endpoint Port" type="string" defaultValue="8000" />
+          <camunda:formField id="pluginPort" label="QHAna Plugin Endpoint Port" type="string" defaultValue="5005" />
+          <camunda:formField id="placeholder" label="Placeholder" type="string" />
+          </camunda:formData>
+        </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_e86687a</bpmn:outgoing>
+      </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_e71ebf0</bpmn:incoming>
+      </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_quantum_group_0_create_deployment" name="Create Deployment" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${qunicornPort}/deployments/</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonBuilder
+
+def circuit = execution.getVariable("circuit")
+println "Circuit: ${circuit}"
+
+def program = [
+    programs: [
+        [
+            quantumCircuit: circuit,
+            assemblerLanguage: "QASM3",
+            pythonFilePath: "",
+            pythonFileMetadata: ""
+        ]
+    ],
+    name: "DeploymentName"
+]
+
+println "program: ${program}"
+
+return new JsonBuilder(program).toPrettyString()</camunda:script>
+              </camunda:inputParameter>
+            <camunda:outputParameter name="deploymentId">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonSlurper
+
+def resp = new JsonSlurper()
+    .parseText(connector.getVariable("response"))
+    
+println "Response: ${resp}"
+
+return resp.id</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_14ca078</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e268c9</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_quantum_group_0_exe_job" name="Execute Job" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${qunicornPort}/jobs/</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonBuilder
+
+def deploymentId = execution.getVariable("deploymentId")
+println "deploymentId: ${deploymentId}"
+
+def program = [
+    name           : "JobName",
+    providerName   : "IBM",
+    deviceName     : "aer_simulator",
+    shots          : 1024,
+    errorMitigation: "none",
+    cutToWidth     : null,
+    token          : "",
+    type           : "RUNNER",
+    deploymentId   : deploymentId
+]
+
+def requestString = new JsonBuilder(program).toPrettyString()
+println "RequestString"
+println requestString
+
+return requestString</camunda:script>
+              </camunda:inputParameter>
+            <camunda:outputParameter name="jobId">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonSlurper
+
+def resp = new JsonSlurper()
+    .parseText(connector.getVariable("response"))
+println "Response: ${resp}"
+
+return resp.self</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0e268c9</bpmn:incoming>
+      <bpmn:outgoing>Flow_0c13e3e</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_quantum_group_0_get_job_res" name="Get Job Results" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${qunicornPort}/${jobId}</camunda:inputParameter>
+            <camunda:outputParameter name="resultExecution">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+
+def resp = new JsonSlurper()
+    .parseText(connector.getVariable("response"))
+println "Response: ${resp}"
+
+return new JsonBuilder(resp.results).toString()</camunda:script>
+              </camunda:outputParameter>
+            <camunda:outputParameter name="statusJob">
+              <camunda:script scriptFormat="groovy">println("Response")
+println(response)
+resp = new groovy.json.JsonSlurper().parseText(response)
+println("Response to extract statusJob: " + resp.toString());
+statusJob= resp.get('state')
+println(statusJob);
+return statusJob;</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_19187dd</bpmn:incoming>
+      <bpmn:outgoing>Flow_d68bc76</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:scriptTask id="Task_quantum_group_0_set_vars_2" name="Set Variables" scriptFormat="groovy">
+      <bpmn:incoming>Flow_abcd3fb</bpmn:incoming>
+      <bpmn:outgoing>Flow_f56ea66</bpmn:outgoing>
+      <bpmn:script>def groupId = execution.getVariable("groupId")
+if (groupId == null) {
+    groupId = 1
+}
+groupId = groupId + 1</bpmn:script>
+      </bpmn:scriptTask>
+    <bpmn:userTask id="Task_quantum_group_0_human" name="Analyze Results">
+      <bpmn:incoming>Flow_f56ea66</bpmn:incoming>
+      <bpmn:outgoing>Flow_e71ebf0</bpmn:outgoing>
+      </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Task_quantum_group_0_gateway_3">
+      <bpmn:incoming>Flow_0c13e3e</bpmn:incoming>
+      <bpmn:incoming>Flow_aaa895e</bpmn:incoming>
+      <bpmn:outgoing>Flow_19187dd</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Task_quantum_group_0_gateway_4">
+      <bpmn:incoming>Flow_d68bc76</bpmn:incoming>
+      <bpmn:outgoing>Flow_abcd3fb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_aaa895e</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5190bd4</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_quantum_group_0_analyze_failed_job" name="Analyze Failed Job">
+      <bpmn:incoming>Flow_5190bd4</bpmn:incoming>
+      <bpmn:outgoing>Flow_bc55c88</bpmn:outgoing>
+      </bpmn:userTask>
+    <bpmn:endEvent id="Task_quantum_group_0_alt_end_2" name="">
+      <bpmn:incoming>Flow_bc55c88</bpmn:incoming>
+      </bpmn:endEvent>
+    <bpmn:scriptTask id="Task_quantum_group_0_set_vars_1" name="Set Variables" scriptFormat="groovy" camunda:resultVariable="matrix">
+      <bpmn:incoming>Flow_e86687a</bpmn:incoming>
+      <bpmn:outgoing>Flow_ceafb88</bpmn:outgoing>
+      <bpmn:script>
+import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+
+// get origin model
+def modelStr = '{"metadata": {"optimizeWidth": null, "optimizeDepth": null, "version": "1.0.0", "name": "My Model", "description": "This is a model.", "author": "", "containsPlaceholder": true}, "compilation_target": "workflow", "nodes": [{"id": "61b6d133-d534-4904-8931-c0ef4ab17c4b", "label": null, "type": "int", "bitSize": null, "value": "a"}, {"id": "1a56e848-5710-46e9-8569-16b4e8c69daa", "label": null, "type": "encode", "encoding": "basis", "bounds": 0}, {"id": "a70c24bf-6a50-42ce-982b-f64c86337af6", "label": null, "type": "measure", "indices": []}], "edges": [{"source": ["1a56e848-5710-46e9-8569-16b4e8c69daa", 0], "target": ["a70c24bf-6a50-42ce-982b-f64c86337af6", 0], "size": 1, "identifier": null}, {"source": ["61b6d133-d534-4904-8931-c0ef4ab17c4b", 0], "target": ["1a56e848-5710-46e9-8569-16b4e8c69daa", 0], "size": null, "identifier": null}]}'
+def placeholder = execution.getVariable("placeholder")
+
+// parse model
+def modelObj = new JsonSlurper().parseText(modelStr)
+
+// set the compilation_target to qasm
+modelObj.compilation_target = "qasm"
+
+// replace the placeholder within the int node with the users input
+modelObj.nodes.each { node -&gt;
+    if (node.type == "int" &amp;&amp; (node.value instanceof String)) {
+        node.value = placeholder
+    }
+}
+
+// json back to string
+def model = new JsonBuilder(modelObj).toPrettyString()
+execution.setVariable("model", model)
+
+println("placeholder: ${placeholder}")
+def groupId = execution.getVariable("groupId")
+println "groupId: ${groupId}"
+
+if (!groupId) {
+    execution.setVariable("groupId", 0)
+} else {
+    execution.setVariable("groupId", groupId+1)
+}
+
+def iterations = execution.getVariable("iterations")
+
+if (!iterations) {
+    execution.setVariable("iterations", 0)
+} else {
+    execution.setVariable("iterations", iterations+1)
+}
+</bpmn:script>
+      </bpmn:scriptTask>
+    <bpmn:serviceTask id="Task_quantum_group_0_backend_req" name="Send Backend Request" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${backendPort}/compile</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+def modelStr = execution.getVariable("model")
+println(modelStr)
+
+def modelObj = new JsonSlurper().parseText(modelStr)
+
+def requestString = new JsonBuilder(modelObj).toPrettyString()
+println("===============================")
+println(requestString)
+return requestString</camunda:script>
+              </camunda:inputParameter>
+            <camunda:outputParameter name="uuid">
+              <camunda:script scriptFormat="groovy">def resp = connector.getVariable("response");
+println "Response: ${resp}"
+resp = new groovy.json.JsonSlurper().parseText(resp)
+println("Response to extract uuid: " + resp.toString());
+uuid= resp.get('uuid')
+println(uuid);
+return uuid;</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_ceafb88</bpmn:incoming>
+      <bpmn:outgoing>Flow_b48aecc</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_quantum_group_0_poll_status" name="Poll Status" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${backendPort}/status/${uuid}</camunda:inputParameter>
+            <camunda:outputParameter name="status">
+              <camunda:script scriptFormat="groovy">def resp = connector.getVariable("response");
+println("Response")
+println(response)
+resp = new groovy.json.JsonSlurper().parseText(resp)
+println("Response to extract status: " + resp.toString());
+status= resp.get('status')
+println(status);
+return status;</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0da6fc7</bpmn:incoming>
+      <bpmn:outgoing>Flow_f58457e</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_quantum_group_0_retrieve_circuit" name="Retrieve Circuit" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${backendPort}/results/${uuid}</camunda:inputParameter>
+            <camunda:outputParameter name="circuit">
+              <camunda:script scriptFormat="groovy">return connector.getVariable("response")</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_d602618</bpmn:incoming>
+      <bpmn:outgoing>Flow_14ca078</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Task_quantum_group_0_gateway_1">
+      <bpmn:incoming>Flow_b48aecc</bpmn:incoming>
+      <bpmn:incoming>Flow_b9a2169</bpmn:incoming>
+      <bpmn:outgoing>Flow_0da6fc7</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Task_quantum_group_0_gateway_2">
+      <bpmn:incoming>Flow_f58457e</bpmn:incoming>
+      <bpmn:outgoing>Flow_d602618</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ca4b974</bpmn:outgoing>
+      <bpmn:outgoing>Flow_e85d15d</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:scriptTask id="Task_quantum_group_0_update_vars" name="Update Variables" scriptFormat="groovy" camunda:resultVariable="matrix">
+      <bpmn:incoming>Flow_ca4b974</bpmn:incoming>
+      <bpmn:outgoing>Flow_b9a2169</bpmn:outgoing>
+      <bpmn:script>def iterations= execution.getVariable("iterations")
+execution.setVariable("iterations", iterations+1)</bpmn:script>
+      </bpmn:scriptTask>
+    <bpmn:userTask id="Task_quantum_group_0_analyze_failed_transf" name="Analyze Failed Transformation">
+      <bpmn:incoming>Flow_e85d15d</bpmn:incoming>
+      <bpmn:outgoing>Flow_f07f3ad</bpmn:outgoing>
+      </bpmn:userTask>
+    <bpmn:endEvent id="Task_quantum_group_0_alt_end_1" name="">
+      <bpmn:incoming>Flow_f07f3ad</bpmn:incoming>
+      </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_e86687a" sourceRef="StartEvent_1" targetRef="Task_quantum_group_0_set_vars_1" />
+    <bpmn:sequenceFlow id="Flow_ceafb88" sourceRef="Task_quantum_group_0_set_vars_1" targetRef="Task_quantum_group_0_backend_req" />
+    <bpmn:sequenceFlow id="Flow_b48aecc" sourceRef="Task_quantum_group_0_backend_req" targetRef="Task_quantum_group_0_gateway_1" />
+    <bpmn:sequenceFlow id="Flow_0da6fc7" sourceRef="Task_quantum_group_0_gateway_1" targetRef="Task_quantum_group_0_poll_status" />
+    <bpmn:sequenceFlow id="Flow_f58457e" sourceRef="Task_quantum_group_0_poll_status" targetRef="Task_quantum_group_0_gateway_2" />
+    <bpmn:sequenceFlow id="Flow_d602618" sourceRef="Task_quantum_group_0_gateway_2" targetRef="Task_quantum_group_0_retrieve_circuit">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == "completed"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ca4b974" sourceRef="Task_quantum_group_0_gateway_2" targetRef="Task_quantum_group_0_update_vars">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status != "completed" &amp;&amp; iterations &lt; 10}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_b9a2169" sourceRef="Task_quantum_group_0_update_vars" targetRef="Task_quantum_group_0_gateway_1" />
+    <bpmn:sequenceFlow id="Flow_14ca078" sourceRef="Task_quantum_group_0_retrieve_circuit" targetRef="Task_quantum_group_0_create_deployment" />
+    <bpmn:sequenceFlow id="Flow_0e268c9" sourceRef="Task_quantum_group_0_create_deployment" targetRef="Task_quantum_group_0_exe_job" />
+    <bpmn:sequenceFlow id="Flow_0c13e3e" sourceRef="Task_quantum_group_0_exe_job" targetRef="Task_quantum_group_0_gateway_3" />
+    <bpmn:sequenceFlow id="Flow_19187dd" sourceRef="Task_quantum_group_0_gateway_3" targetRef="Task_quantum_group_0_get_job_res" />
+    <bpmn:sequenceFlow id="Flow_d68bc76" sourceRef="Task_quantum_group_0_get_job_res" targetRef="Task_quantum_group_0_gateway_4" />
+    <bpmn:sequenceFlow id="Flow_abcd3fb" sourceRef="Task_quantum_group_0_gateway_4" targetRef="Task_quantum_group_0_set_vars_2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob == "FINISHED" || statusJob == "SUCCESS"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_f56ea66" sourceRef="Task_quantum_group_0_set_vars_2" targetRef="Task_quantum_group_0_human" />
+    <bpmn:sequenceFlow id="Flow_aaa895e" sourceRef="Task_quantum_group_0_gateway_4" targetRef="Task_quantum_group_0_gateway_3">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob != "ERROR" &amp;&amp; statusJob != "FINISHED" &amp;&amp; statusJob != "FAILURE" &amp;&amp; statusJob != "SUCCESS"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_5190bd4" sourceRef="Task_quantum_group_0_gateway_4" targetRef="Task_quantum_group_0_analyze_failed_job">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob == "ERROR" || statusJob == "FAILURE"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_bc55c88" sourceRef="Task_quantum_group_0_analyze_failed_job" targetRef="Task_quantum_group_0_alt_end_2" />
+    <bpmn:sequenceFlow id="Flow_e85d15d" sourceRef="Task_quantum_group_0_gateway_2" targetRef="Task_quantum_group_0_analyze_failed_transf">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${iterations &gt;= 10}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_f07f3ad" sourceRef="Task_quantum_group_0_analyze_failed_transf" targetRef="Task_quantum_group_0_alt_end_1" />
+    <bpmn:sequenceFlow id="Flow_e71ebf0" sourceRef="Task_quantum_group_0_human" targetRef="EndEvent_1" />
+    </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_workflow_process">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1" isMarkerVisible="true">
+        <dc:Bounds x="252" y="222" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1" isMarkerVisible="true">
+        <dc:Bounds x="2402" y="222" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_set_vars_1_di" bpmnElement="Task_quantum_group_0_set_vars_1" isMarkerVisible="true">
+        <dc:Bounds x="422" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_backend_req_di" bpmnElement="Task_quantum_group_0_backend_req" isMarkerVisible="true">
+        <dc:Bounds x="642" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_poll_status_di" bpmnElement="Task_quantum_group_0_poll_status" isMarkerVisible="true">
+        <dc:Bounds x="862" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_retrieve_circuit_di" bpmnElement="Task_quantum_group_0_retrieve_circuit" isMarkerVisible="true">
+        <dc:Bounds x="1082" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_create_deployment_di" bpmnElement="Task_quantum_group_0_create_deployment" isMarkerVisible="true">
+        <dc:Bounds x="1302" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_exe_job_di" bpmnElement="Task_quantum_group_0_exe_job" isMarkerVisible="true">
+        <dc:Bounds x="1522" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_get_job_res_di" bpmnElement="Task_quantum_group_0_get_job_res" isMarkerVisible="true">
+        <dc:Bounds x="1742" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_set_vars_2_di" bpmnElement="Task_quantum_group_0_set_vars_2" isMarkerVisible="true">
+        <dc:Bounds x="1962" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_human_di" bpmnElement="Task_quantum_group_0_human" isMarkerVisible="true">
+        <dc:Bounds x="2182" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_update_vars_di" bpmnElement="Task_quantum_group_0_update_vars" isMarkerVisible="true">
+        <dc:Bounds x="862" y="90" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_analyze_failed_job_di" bpmnElement="Task_quantum_group_0_analyze_failed_job" isMarkerVisible="true">
+        <dc:Bounds x="1962" y="310" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_gateway_1_di" bpmnElement="Task_quantum_group_0_gateway_1" isMarkerVisible="true">
+        <dc:Bounds x="787" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_gateway_2_di" bpmnElement="Task_quantum_group_0_gateway_2" isMarkerVisible="true">
+        <dc:Bounds x="1007" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_gateway_3_di" bpmnElement="Task_quantum_group_0_gateway_3" isMarkerVisible="true">
+        <dc:Bounds x="1667" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_gateway_4_di" bpmnElement="Task_quantum_group_0_gateway_4" isMarkerVisible="true">
+        <dc:Bounds x="1887" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_analyze_failed_transf_di" bpmnElement="Task_quantum_group_0_analyze_failed_transf" isMarkerVisible="true">
+        <dc:Bounds x="1082" y="310" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_alt_end_1_di" bpmnElement="Task_quantum_group_0_alt_end_1" isMarkerVisible="true">
+        <dc:Bounds x="1302" y="332" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_quantum_group_0_alt_end_2_di" bpmnElement="Task_quantum_group_0_alt_end_2" isMarkerVisible="true">
+        <dc:Bounds x="2132" y="332" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_e86687a_di" bpmnElement="Flow_e86687a">
+        <di:waypoint x="288" y="240" />
+        <di:waypoint x="422" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ceafb88_di" bpmnElement="Flow_ceafb88">
+        <di:waypoint x="542" y="240" />
+        <di:waypoint x="642" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_b48aecc_di" bpmnElement="Flow_b48aecc">
+        <di:waypoint x="762" y="240" />
+        <di:waypoint x="787" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0da6fc7_di" bpmnElement="Flow_0da6fc7">
+        <di:waypoint x="837" y="240" />
+        <di:waypoint x="862" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_f58457e_di" bpmnElement="Flow_f58457e">
+        <di:waypoint x="982" y="240" />
+        <di:waypoint x="1007" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_d602618_di" bpmnElement="Flow_d602618">
+        <di:waypoint x="1057" y="240" />
+        <di:waypoint x="1082" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ca4b974_di" bpmnElement="Flow_ca4b974">
+        <di:waypoint x="1032" y="215" />
+        <di:waypoint x="1032" y="130" />
+        <di:waypoint x="982" y="130" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_b9a2169_di" bpmnElement="Flow_b9a2169">
+        <di:waypoint x="862" y="130" />
+        <di:waypoint x="812" y="130" />
+        <di:waypoint x="812" y="215" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14ca078_di" bpmnElement="Flow_14ca078">
+        <di:waypoint x="1202" y="240" />
+        <di:waypoint x="1302" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e268c9_di" bpmnElement="Flow_0e268c9">
+        <di:waypoint x="1422" y="240" />
+        <di:waypoint x="1522" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0c13e3e_di" bpmnElement="Flow_0c13e3e">
+        <di:waypoint x="1642" y="240" />
+        <di:waypoint x="1667" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19187dd_di" bpmnElement="Flow_19187dd">
+        <di:waypoint x="1717" y="240" />
+        <di:waypoint x="1742" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_d68bc76_di" bpmnElement="Flow_d68bc76">
+        <di:waypoint x="1862" y="240" />
+        <di:waypoint x="1887" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_abcd3fb_di" bpmnElement="Flow_abcd3fb">
+        <di:waypoint x="1937" y="240" />
+        <di:waypoint x="1962" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_f56ea66_di" bpmnElement="Flow_f56ea66">
+        <di:waypoint x="2082" y="240" />
+        <di:waypoint x="2182" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_aaa895e_di" bpmnElement="Flow_aaa895e">
+        <di:waypoint x="1912" y="215" />
+        <di:waypoint x="1912" y="175" />
+        <di:waypoint x="1692" y="175" />
+        <di:waypoint x="1692" y="203" />
+        <di:waypoint x="1692" y="215" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5190bd4_di" bpmnElement="Flow_5190bd4">
+        <di:waypoint x="1912" y="265" />
+        <di:waypoint x="1912" y="350" />
+        <di:waypoint x="1962" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_bc55c88_di" bpmnElement="Flow_bc55c88">
+        <di:waypoint x="2082" y="350" />
+        <di:waypoint x="2132" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_e85d15d_di" bpmnElement="Flow_e85d15d">
+        <di:waypoint x="1032" y="265" />
+        <di:waypoint x="1032" y="350" />
+        <di:waypoint x="1082" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_f07f3ad_di" bpmnElement="Flow_f07f3ad">
+        <di:waypoint x="1202" y="350" />
+        <di:waypoint x="1302" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_e71ebf0_di" bpmnElement="Flow_e71ebf0">
+        <di:waypoint x="2302" y="240" />
+        <di:waypoint x="2402" y="240" />
+        </bpmndi:BPMNEdge>
+      </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+  </bpmn:definitions>

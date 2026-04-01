@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "name": "My Model",
+    "description": "This is a model.",
+    "author": "",
+    "containsPlaceholder": true,
+    "id": "flow-1775066236266",
+    "timestamp": "2026-04-01T17:57:16.266Z"
+  },
+  "nodes": [
+    {
+      "id": "6ad8ab0e-d098-468b-931a-d74b76941b09",
+      "type": "pluginNode",
+      "position": {
+        "x": 720,
+        "y": 165
+      },
+      "data": {
+        "label": "Classical Clustering",
+        "pluginName": "classical-k-means",
+        "tags": [],
+        "dataInputs": [
+          {
+            "parameter": "entityPointsUrl",
+            "data_type": "entity/vector",
+            "content_type": [
+              "application/json",
+              "text/csv"
+            ],
+            "required": true
+          },
+          {
+            "parameter": "numberOfClusters",
+            "data_type": "int",
+            "content_type": [
+              "text/plain"
+            ],
+            "required": true
+          },
+          {
+            "parameter": "variant",
+            "data_type": "string",
+            "content_type": [
+              "text/plain"
+            ],
+            "required": false
+          },
+          {
+            "parameter": "tolerance",
+            "data_type": "float",
+            "content_type": [
+              "text/plain"
+            ],
+            "required": false
+          },
+          {
+            "parameter": "maxIterations",
+            "data_type": "int",
+            "content_type": [
+              "text/plain"
+            ],
+            "required": false
+          }
+        ],
+        "dataOutputs": [
+          {
+            "name": "Cluster Labels",
+            "data_type": "entity/label",
+            "content_type": [
+              "application/json"
+            ],
+            "required": true
+          },
+          {
+            "name": "Visualization",
+            "data_type": "plot",
+            "content_type": [
+              "text/html"
+            ],
+            "required": false
+          }
+        ],
+        "inputs": [
+          {
+            "id": "5958b105-fe87-41c5-9b3a-9a5951fa128d",
+            "edgeId": "d857dc4d-a69f-4930-9693-53f1dbcded27",
+            "outputIdentifier": "",
+            "identifiers": [
+              "q234202"
+            ],
+            "targetHandle": "classicalHandlePluginInput06ad8ab0e-d098-468b-931a-d74b76941b09"
+          },
+          {
+            "id": "5590e127-9c58-47c6-94e2-e2082d068208",
+            "edgeId": "b7e9c217-3aae-4c43-ab51-a3876d8296d5",
+            "outputIdentifier": "",
+            "identifiers": [
+              "q306047"
+            ],
+            "targetHandle": "classicalHandlePluginInput16ad8ab0e-d098-468b-931a-d74b76941b09"
+          }
+        ],
+        "children": [],
+        "implementation": "",
+        "implementationType": "",
+        "uncomputeImplementationType": "",
+        "uncomputeImplementation": "",
+        "clusteringAlgorithm": "k-means",
+        "identifiers": [
+          "q306047"
+        ],
+        "inputTypes": [
+          "file",
+          "number",
+          "string",
+          "number",
+          "number"
+        ],
+        "outputTypes": {
+          "0": "array",
+          "1": "any"
+        }
+      },
+      "width": 320,
+      "height": 590,
+      "positionAbsolute": {
+        "x": 720,
+        "y": 165
+      },
+      "dragging": true
+    },
+    {
+      "id": "5958b105-fe87-41c5-9b3a-9a5951fa128d",
+      "type": "dataTypeNode",
+      "position": {
+        "x": 45,
+        "y": 150
+      },
+      "data": {
+        "label": "File",
+        "inputs": [],
+        "children": [],
+        "implementation": "",
+        "implementationType": "",
+        "uncomputeImplementationType": "",
+        "uncomputeImplementation": "",
+        "completionGuaranteed": true,
+        "compactOptions": [
+          true,
+          false
+        ],
+        "identifiers": [
+          "q234202"
+        ],
+        "dataType": "File",
+        "value": "http://192.168.20.106:9091/experiments/1/data/entity_distances_aggregator_mean_from_transformers_attr_dist_transformer_linear_inverse_from_sym_max_mean_Yyfegz-Otytf.json/download?version=1",
+        "outputIdentifier": "",
+        "inputTypes": [],
+        "outputTypes": {
+          "0": "File"
+        }
+      },
+      "width": 450,
+      "height": 270,
+      "positionAbsolute": {
+        "x": 45,
+        "y": 150
+      },
+      "dragging": true
+    },
+    {
+      "id": "5590e127-9c58-47c6-94e2-e2082d068208",
+      "type": "dataTypeNode",
+      "position": {
+        "x": 60,
+        "y": 465
+      },
+      "data": {
+        "label": "Number",
+        "inputs": [],
+        "children": [],
+        "implementation": "",
+        "implementationType": "",
+        "uncomputeImplementationType": "",
+        "uncomputeImplementation": "",
+        "completionGuaranteed": true,
+        "compactOptions": [
+          true,
+          false
+        ],
+        "identifiers": [
+          "q306047"
+        ],
+        "dataType": "Number",
+        "value": "4",
+        "outputIdentifier": "",
+        "inputTypes": [],
+        "outputTypes": {
+          "0": "Number"
+        }
+      },
+      "width": 450,
+      "height": 270,
+      "positionAbsolute": {
+        "x": 60,
+        "y": 465
+      },
+      "dragging": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "5590e127-9c58-47c6-94e2-e2082d068208",
+      "sourceHandle": "classicalHandleDataTypeOutput05590e127-9c58-47c6-94e2-e2082d068208",
+      "target": "6ad8ab0e-d098-468b-931a-d74b76941b09",
+      "targetHandle": "classicalHandlePluginInput16ad8ab0e-d098-468b-931a-d74b76941b09",
+      "type": "classicalEdge",
+      "id": "b7e9c217-3aae-4c43-ab51-a3876d8296d5",
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#F5A843",
+        "hidden": false
+      }
+    },
+    {
+      "source": "5958b105-fe87-41c5-9b3a-9a5951fa128d",
+      "sourceHandle": "classicalHandleDataTypeOutput05958b105-fe87-41c5-9b3a-9a5951fa128d",
+      "target": "6ad8ab0e-d098-468b-931a-d74b76941b09",
+      "targetHandle": "classicalHandlePluginInput06ad8ab0e-d098-468b-931a-d74b76941b09",
+      "type": "classicalEdge",
+      "id": "d857dc4d-a69f-4930-9693-53f1dbcded27",
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#F5A843",
+        "hidden": false
+      }
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

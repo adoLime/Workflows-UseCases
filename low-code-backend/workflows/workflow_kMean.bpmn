@@ -1,0 +1,244 @@
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_7b7eecd3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="QuantME Modeler" exporterVersion="4.5.0-nightly.20220628">
+  <bpmn:process id="Process_workflow_process" isExecutable="true" camunda:historyTimeToLive="360000">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="ipAdress" label="IP Adresse" type="string" defaultValue="" />
+          <camunda:formField id="qunicornPort" label="Qunicorn Endpoint Port" type="string" defaultValue="8080" />
+          <camunda:formField id="backendPort" label="Leqo-Backend Endpoint Port" type="string" defaultValue="8000" />
+          <camunda:formField id="pluginPort" label="QHAna Plugin Endpoint Port" type="string" defaultValue="5005" />
+          <camunda:formField id="placeholder" label="Placeholder" type="string" />
+          </camunda:formData>
+        </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_a4073e8</bpmn:outgoing>
+      </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_820b647</bpmn:incoming>
+      </bpmn:endEvent>
+    <bpmn:scriptTask id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_set_vars_2" name="Set Variables" scriptFormat="groovy">
+      <bpmn:incoming>Flow_3af9ac2</bpmn:incoming>
+      <bpmn:outgoing>Flow_ff862b7</bpmn:outgoing>
+      <bpmn:script>
+import groovy.json.JsonOutput
+def resultExecution = execution.getVariable("resultExecution")
+def result = new groovy.json.JsonSlurper().parseText(resultExecution)
+result.outputs.eachWithIndex { output, i -&gt;
+    execution.setVariable("outputHref_${i}", output.href)
+}
+</bpmn:script>
+      </bpmn:scriptTask>
+    <bpmn:userTask id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_human" name="Analyze Results">
+      <bpmn:incoming>Flow_ff862b7</bpmn:incoming>
+      <bpmn:outgoing>Flow_820b647</bpmn:outgoing>
+      </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3">
+      <bpmn:incoming>Flow_703ba41</bpmn:incoming>
+      <bpmn:incoming>Flow_b451b56</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e07e90</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4">
+      <bpmn:incoming>Flow_8f8460e</bpmn:incoming>
+      <bpmn:outgoing>Flow_3af9ac2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_8414c3c</bpmn:outgoing>
+      <bpmn:outgoing>Flow_b451b56</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_analyze_failed_job" name="Analyze Failed Job">
+      <bpmn:incoming>Flow_8414c3c</bpmn:incoming>
+      <bpmn:outgoing>Flow_8416f6d</bpmn:outgoing>
+      </bpmn:userTask>
+    <bpmn:endEvent id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_alt_end_2" name="">
+      <bpmn:incoming>Flow_8416f6d</bpmn:incoming>
+      </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_call_plugin" name="Call Classical-K-Means Clustering" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/x-www-form-urlencoded</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${pluginPort}/plugins/classical-k-means@v0-1-1/process/</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+              <camunda:script scriptFormat="groovy">import java.net.URLEncoder
+
+def uri = "http://192.168.20.106:9091/experiments/1/data/entity_distances_aggregator_mean_from_transformers_attr_dist_transformer_linear_inverse_from_sym_max_mean_Yyfegz-Otytf.json/download?version=1"
+
+def data = [
+    "entityPointsUrl=${URLEncoder.encode(uri, 'UTF-8')}",
+    "numClusters=${placeholder}",
+    "maxiter=200",
+    "relativeResidual=5",
+    "visualize=true",
+]
+
+def formData = data.join('&amp;')
+
+println "=================== REQUEST ==================="
+println formData
+
+formData</camunda:script>
+              </camunda:inputParameter>
+            <camunda:outputParameter name="deploymentId">
+              <camunda:script scriptFormat="groovy">println "=================== RESPONSE ==================="
+println "Status Code: ${statusCode}"
+println "Headers: ${headers}"
+println "Body: ${response}"
+println "================================================"
+
+// Location Header für Redirect holen
+def redirectUrl = null
+
+if (statusCode == 303 || statusCode == 301 || statusCode == 302) {
+// Location Header auslesen
+redirectUrl = headers?.get('Location') ?: headers?.get('location')
+println "Redirect URL: ${redirectUrl}"
+}
+
+redirectUrl</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_a4073e8</bpmn:incoming>
+      <bpmn:outgoing>Flow_703ba41</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_poll_job_res" name="Poll Job Results" camunda:asyncAfter="true" camunda:exclusive="false">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Accept">application/json</camunda:entry>
+                <camunda:entry key="Content-Type">application/x-www-form-urlencoded</camunda:entry>
+                </camunda:map>
+              </camunda:inputParameter>
+            <camunda:inputParameter name="url">http://${ipAdress}:${pluginPort}/${deploymentId}</camunda:inputParameter>
+            <camunda:outputParameter name="resultExecution">
+              <camunda:script scriptFormat="groovy">import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
+
+def resp = new JsonSlurper()
+    .parseText(connector.getVariable("response"))
+println "Response to extract resultExecution: ${resp}"
+def json = JsonOutput.prettyPrint(JsonOutput.toJson(resp))
+
+return json</camunda:script>
+              </camunda:outputParameter>
+            <camunda:outputParameter name="statusJob">
+              <camunda:script scriptFormat="groovy">println("Response")
+println(response)
+resp = new groovy.json.JsonSlurper().parseText(response)
+println("Response to extract statusJob: " + resp.toString());
+statusJob= resp.get('status')
+println(statusJob);
+return statusJob;</camunda:script>
+              </camunda:outputParameter>
+            </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1e07e90</bpmn:incoming>
+      <bpmn:outgoing>Flow_8f8460e</bpmn:outgoing>
+      </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_a4073e8" sourceRef="StartEvent_1" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_call_plugin" />
+    <bpmn:sequenceFlow id="Flow_703ba41" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_call_plugin" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3" />
+    <bpmn:sequenceFlow id="Flow_1e07e90" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_poll_job_res" />
+    <bpmn:sequenceFlow id="Flow_8f8460e" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_poll_job_res" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4" />
+    <bpmn:sequenceFlow id="Flow_3af9ac2" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_set_vars_2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob == "FINISHED" || statusJob == "SUCCESS"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ff862b7" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_set_vars_2" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_human" />
+    <bpmn:sequenceFlow id="Flow_8414c3c" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_analyze_failed_job">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob == "ERROR" || statusJob == "FAILURE"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_8416f6d" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_analyze_failed_job" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_alt_end_2" />
+    <bpmn:sequenceFlow id="Flow_b451b56" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4" targetRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusJob != "ERROR" &amp;&amp; statusJob != "FINISHED" &amp;&amp; statusJob != "FAILURE" &amp;&amp; statusJob != "SUCCESS"}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_820b647" sourceRef="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_human" targetRef="EndEvent_1" />
+    </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_workflow_process">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1" isMarkerVisible="true">
+        <dc:Bounds x="252" y="222" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1" isMarkerVisible="true">
+        <dc:Bounds x="1302" y="222" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_call_plugin_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_call_plugin" isMarkerVisible="true">
+        <dc:Bounds x="422" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_poll_job_res_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_poll_job_res" isMarkerVisible="true">
+        <dc:Bounds x="642" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_set_vars_2_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_set_vars_2" isMarkerVisible="true">
+        <dc:Bounds x="862" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_human_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_human" isMarkerVisible="true">
+        <dc:Bounds x="1082" y="200" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_analyze_failed_job_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_analyze_failed_job" isMarkerVisible="true">
+        <dc:Bounds x="862" y="310" width="120" height="80" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_3" isMarkerVisible="true">
+        <dc:Bounds x="567" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_gateway_4" isMarkerVisible="true">
+        <dc:Bounds x="787" y="215" width="50" height="50" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_alt_end_2_di" bpmnElement="Task_6ad8ab0e-d098-468b-931a-d74b76941b09_alt_end_2" isMarkerVisible="true">
+        <dc:Bounds x="1032" y="332" width="36" height="36" />
+        </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_a4073e8_di" bpmnElement="Flow_a4073e8">
+        <di:waypoint x="288" y="240" />
+        <di:waypoint x="422" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_703ba41_di" bpmnElement="Flow_703ba41">
+        <di:waypoint x="542" y="240" />
+        <di:waypoint x="567" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e07e90_di" bpmnElement="Flow_1e07e90">
+        <di:waypoint x="617" y="240" />
+        <di:waypoint x="642" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8f8460e_di" bpmnElement="Flow_8f8460e">
+        <di:waypoint x="762" y="240" />
+        <di:waypoint x="787" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3af9ac2_di" bpmnElement="Flow_3af9ac2">
+        <di:waypoint x="837" y="240" />
+        <di:waypoint x="862" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ff862b7_di" bpmnElement="Flow_ff862b7">
+        <di:waypoint x="982" y="240" />
+        <di:waypoint x="1082" y="240" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8414c3c_di" bpmnElement="Flow_8414c3c">
+        <di:waypoint x="812" y="265" />
+        <di:waypoint x="812" y="350" />
+        <di:waypoint x="862" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8416f6d_di" bpmnElement="Flow_8416f6d">
+        <di:waypoint x="982" y="350" />
+        <di:waypoint x="1032" y="350" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_b451b56_di" bpmnElement="Flow_b451b56">
+        <di:waypoint x="812" y="215" />
+        <di:waypoint x="812" y="175" />
+        <di:waypoint x="592" y="175" />
+        <di:waypoint x="592" y="203" />
+        <di:waypoint x="592" y="215" />
+        </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_820b647_di" bpmnElement="Flow_820b647">
+        <di:waypoint x="1202" y="240" />
+        <di:waypoint x="1302" y="240" />
+        </bpmndi:BPMNEdge>
+      </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+  </bpmn:definitions>
