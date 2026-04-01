@@ -190,13 +190,13 @@ as described in Sections 4.1, 5.1, and 6.1 of the paper.
    Open it to see the seven steps modeled as QHAna service tasks.
 ![The QHAna service tasks](qhana-muse/QHAnaWorkflow.png)
 
-The generated workflow can be found in `qhana-muse/muse-workflow.xml`.
+The generated workflow can be found in [`qhana-muse/muse-workflow.xml`](qhana-muse/muse-workflow.xml).
 
 2. Click **Transformation** in the top bar to convert the QHAna service tasks into
    executable BPMN service tasks.
 ![The executable BPMN service tasks](qhana-muse/QHAnaWorkflowTransformed.png)
 
-The generated BPMN workflow can be found in `qhana-muse/muse-workflow_transformed.bpmn`.
+The generated BPMN workflow can be found in [`qhana-muse/muse-workflow_transformed.bpmn`](qhana-muse/muse-workflow_transformed.bpmn).
 
 3. Verify that input and output mappings are correct:
    - The `costume-loader` plugin has no preceding step, so its parameters appear as
