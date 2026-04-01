@@ -263,7 +263,7 @@ clusters. This model generates a plugin workflow that calls the QHAna plugin run
    modeler's history view.
 3. Once the status is **completed**, download the generated workflow and the QRM
    archive (if the model contains quantum elements).
-   ![History](low-code-backend/history.png)
+   ![History](graphics/history.png)
 
 
 Alternatively, you can use the pre-generated workflows from the [low-code-backend/workflows/](low-code-backend/workflows/) directory.
@@ -272,7 +272,7 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
 
 1. Open the Workflow Editor at http://localhost:1893.
 2. Open downloaded bpmn workflow.
-![Workflow containing Qubit Node](low-code-backend/workflowQubit.png)
+![Workflow containing Qubit Node](graphics/workflowQubit.png)
 3. Click the Deploy Workflow button in the Workflow Editor.
 
 ### Executing in Camunda
@@ -280,22 +280,28 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
 1. Open the Camunda web interface at http://localhost:8090.
 2. Log in with the credentials **demo / demo**.
 3. Start a new process instance:
-![Camunda Start Process](low-code-backend/CamundaStartProcess.png)
+![Camunda Start Process](graphics/CamundaStartProcess.png)
 4. Fill in the required form fields:
    - **IP Address**: The IP address of the host machine (e.g., `localhost`)
    - **Qunicorn Port**: `8080`
    - **Backend Port**: `8000`
    - **Plugin Port**: `5005` (only for plugin models)
    - **Placeholder** (only for placeholder models): The value to substitute
-   ![Camunda Form Fields](low-code-backend/CamundaIP.png)
+   ![Camunda Form Fields](graphics/CamundaIP.png)
 5. Open the **Cockpit** to monitor the running process instance.
 6. The process token should advance through the tasks and reach the
    **Analyze Results** user task.
-   ![Camunda Analyze Results](low-code-backend/CamundaWorkflowQubit.png)
+   ![Camunda Analyze Results](graphics/CamundaWorkflowQubit.png)
 7. Open the Task List and Claim the Task:
-![Camunda Task List](low-code-backend/CamundaClaim.png)
+![Camunda Task List](graphics/CamundaClaim.png)
 8. Check the results in the Form tab under "resultExecution": 
-![CamundaResult](low-code-backend/CamundaResult.png)
+![CamundaResult](graphics/CamundaResult.png)
+
+Since
+the test model applies a Hadamard gate to a single qubit initialized in the |0⟩ state, the expected
+measurement result is an approximately equal distribution between 0 and 1. The results returned
+by Qunicorn confirmed this: the measured probabilities were close to 50 % for each outcome,
+which matches the theoretical prediction for this circuit.
 
 ## References
 
@@ -305,3 +311,11 @@ Alternatively, you can use the pre-generated workflows from the [low-code-backen
 - [QuantME-UseCases](https://github.com/UST-QuAntiL/QuantME-UseCases)
 - [QHAna Docker](https://github.com/UST-QuAntiL/qhana-docker)
 - [MUSE Experiment Guide](https://qhana.readthedocs.io/en/latest/muse.html)
+
+## Disclaimer of Warranty
+
+Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
+
+## Haftungsausschluss
+
+Dies ist ein Forschungsprototyp. Die Haftung für entgangenen Gewinn, Produktionsausfall, Betriebsunterbrechung, entgangene Nutzungen, Verlust von Daten und Informationen, Finanzierungsaufwendungen sowie sonstige Vermögens- und Folgeschäden ist, außer in Fällen von grober Fahrlässigkeit, Vorsatz und Personenschäden, ausgeschlossen.
